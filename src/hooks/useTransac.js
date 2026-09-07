@@ -1,27 +1,29 @@
 import { useState, useEffect } from 'react';
 
-export default function useTransac() {
+export default function useTransactions() {
   const [transactions, setTransactions] = useState(() => {
-    const savedData = localStorage.getItem('budget_transactions');
-    return savedData ? JSON.parse(savedData) : [];
+    const saved = localStorage.getItem('transactions');
+    return saved ? JSON.parse(saved) : [];
   });
 
   useEffect(() => {
-    localStorage.setItem('budget_transactions', JSON.stringify(transactions));
+    localStorage.setItem('transactions', JSON.stringify(transactions));
   }, [transactions]);
 
-  const addTransaction = (newTransaction) => {
-    const transactionWithId = { ...newTransaction, id: Date.now().toString() };
-    setTransactions([...transactions, transactionWithId]);
+  const addTransaction = (newTx) => {
+    const txWithId = { ...newTx, id: Date.now().toString() };
+    setTransactions((prev) => [txWithId, ...prev]);
+  };
+
+  const updateTransaction = (id, updatedFields) => {
+    setTransactions((prev) =>
+      prev.map((tx) => (tx.id === id ? { ...tx, ...updatedFields } : tx))
+    );
   };
 
   const deleteTransaction = (id) => {
-    setTransactions(transactions.filter(transaction => transaction.id !== id));
+    setTransactions((prev) => prev.filter((tx) => tx.id !== id));
   };
 
-  return { 
-    transactions, 
-    addTransaction, 
-    deleteTransaction 
-  };
+  return { transactions, addTransaction, updateTransaction, deleteTransaction };
 }

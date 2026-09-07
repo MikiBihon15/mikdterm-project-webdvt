@@ -3,36 +3,28 @@ import { useNavigate } from 'react-router-dom';
 import useTransactions from '../hooks/useTransac';
 
 export default function AddTransactions() {
-  const { addTransaction } = useTransactions();
   const navigate = useNavigate();
+  const { addTransaction } = useTransactions();
 
   const [description, setDescription] = useState('');
-  const [amount, setAmount] = useState('');
+  const [hasMultiple, setHasMultiple] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const [price, setPrice] = useState('');
   const [type, setType] = useState('expense');
   const [category, setCategory] = useState('');
-  const [otherCategory, setOtherCategory] = useState('');
-  const [error, setError] = useState('');
-  const [isMultiple, setIsMultiple] = useState(false);
-  const [quantity, setQuantity] = useState('1');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (!description || !amount || !category || (category === 'other' && !otherCategory)) {
-      setError('Please fill out all required fields.');
-      return;
-    }
-
-    const finalCategory = category === 'other' ? otherCategory : category;
-    const qty = isMultiple ? parseInt(quantity || 1) : 1;
-    const calculatedAmount = parseFloat(amount) * qty;
+    
+    const finalQuantity = hasMultiple ? parseInt(quantity) : 1;
+    const finalAmount = parseFloat(price) * finalQuantity;
 
     addTransaction({
       description,
-      amount: calculatedAmount,
-      quantity: qty,
+      amount: finalAmount,
+      quantity: finalQuantity,
       type,
-      category: finalCategory,
+      category,
       date: new Date().toISOString()
     });
 
@@ -40,132 +32,106 @@ export default function AddTransactions() {
   };
 
   return (
-    <div className="max-w-md mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Add Transaction</h2>
-
-      {error && <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">{error}</div>}
-
+    <div>
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Add Transaction</h2>
+      
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">Description</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Description</label>
           <input 
-            type="text"
+            type="text" 
+            placeholder="e.g., Eggs"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="e.g., Eggs"
-            className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 bg-white"
+            required
+            className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
         </div>
 
-        {/* Checkbox right below Description */}
-        <div className="flex items-center gap-2 pt-1">
+        <div className="flex items-center gap-2">
           <input 
             type="checkbox" 
-            id="multipleCheck"
-            checked={isMultiple}
-            onChange={(e) => {
-              setIsMultiple(e.target.checked);
-              if (!e.target.checked) setQuantity('1');
-            }}
-            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+            id="multiple"
+            checked={hasMultiple}
+            onChange={(e) => setHasMultiple(e.target.checked)}
+            className="w-4 h-4"
           />
-          <label htmlFor="multipleCheck" className="text-sm font-medium text-gray-700 cursor-pointer">
-            Buy more than 1 quantity?
+          <label htmlFor="multiple" className="text-sm text-gray-700 dark:text-gray-200">
+            Edit quantity
           </label>
         </div>
 
-        {/* Quantity Input */}
-        <div>
-          <label className={`block text-sm font-medium mb-1 ${isMultiple ? 'text-gray-600' : 'text-gray-400'}`}>
-            Quantity
-          </label>
-          <input 
-            type="number" 
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value.replace('-', ''))}
-            disabled={!isMultiple}
-            placeholder="1" 
-            min="1"
-            className={`w-full p-3 border rounded-xl focus:outline-none transition-colors ${
-              isMultiple 
-                ? 'border-gray-200 bg-white focus:border-blue-500 text-gray-900' 
-                : 'border-gray-100 bg-gray-100 text-gray-400 cursor-not-allowed'
-            }`}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">Price per item (₱)</label>
-          <div className="relative">
-            <span className="absolute left-4 top-3 text-gray-400">₱</span>
+        {hasMultiple && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Quantity</label>
             <input 
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value.replace('-', ''))}
-              placeholder="0.00"
-              min="0"
-              step="0.01"
-              className="w-full p-3 pl-8 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 bg-white"
-            />
-          </div>
-        </div>
-
-        <div className="flex gap-4 pt-1">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input 
-              type="radio"
-              value="expense"
-              checked={type === 'expense'}
-              onChange={(e) => setType(e.target.value)}
-              className="accent-blue-500"
-            />
-            <span className="text-sm text-gray-700">Expense</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input 
-              type="radio"
-              value="income"
-              checked={type === 'income'}
-              onChange={(e) => setType(e.target.value)}
-              className="accent-blue-500"
-            />
-            <span className="text-sm text-gray-700">Income</span>
-          </label>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">Category</label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 bg-white"
-          >
-            <option value="" disabled>Select a category</option>
-            <option value="Food">Food</option>
-            <option value="Transportation">Transportation</option>
-            <option value="Entertainment">Entertainment</option>
-            <option value="Salary">Salary / Allowance</option>
-            <option value="other">Other(specify)</option>
-          </select>
-        </div>
-
-        {category === 'other' && (
-          <div className="mt-3">
-            <label className="block text-sm font-medium text-gray-600 mb-1">Specify Category</label>
-            <input 
-              type="text"
-              value={otherCategory}
-              onChange={(e) => setOtherCategory(e.target.value)}
-              placeholder="e.g., Computer Parts"
-              className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 bg-white"
+              type="number" 
+              min="1"
+              step="1"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value.replace(/\./g, ''))}
+              required
+              className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
         )}
 
-        <button 
-          type="submit"
-          className="w-full mt-2 bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 rounded-xl transition-colors"
-        >
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Price per item (₱)</label>
+          <input 
+            type="number" 
+            step="0.01"
+            min="0"
+            placeholder="₱ 0.00"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            required
+            className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          />
+        </div>
+
+        <div className="flex gap-4 items-center py-2">
+          <label className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
+            <input 
+              type="radio" 
+              name="type" 
+              value="expense" 
+              checked={type === 'expense'} 
+              onChange={() => setType('expense')} 
+            /> 
+            Expense
+          </label>
+          <label className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
+            <input 
+              type="radio" 
+              name="type" 
+              value="income" 
+              checked={type === 'income'} 
+              onChange={() => setType('income')} 
+            /> 
+            Income
+          </label>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Category</label>
+          <select 
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            required
+            className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          >
+            <option value="" disabled>Select a category</option>
+            <option value="Food">Food</option>
+            <option value="Transport">Transport</option>
+            <option value="Utilities">Utilities</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Salary">Salary</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 rounded-xl transition-colors mt-4">
           Save Transaction
         </button>
       </form>
