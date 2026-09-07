@@ -40,7 +40,7 @@ export default function AddTransactions() {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Description(General or Specific)</label>
           <input 
             type="text" 
-            placeholder="e.g., Eggs"
+            placeholder="e.g., Grocery or Eggs"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
