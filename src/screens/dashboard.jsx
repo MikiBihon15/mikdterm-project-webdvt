@@ -11,8 +11,7 @@ export default function Dashboard() {
   return (
     <div>
       <h2 className="text-2xl font-bold mb-2">Dashboard</h2>
-      
-      {/* total balan */}
+
       <div className="text-3xl font-bold text-gray-800 mb-8">
         Balance: ₱{balance.toFixed(2)}
       </div>
@@ -25,16 +24,26 @@ export default function Dashboard() {
           {transactions.map((tx) => (
             <div key={tx.id} className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
               <div>
-                <p className="font-medium text-gray-800">{tx.description}</p>
+                <p className="font-medium text-gray-800">
+                  {tx.description} {tx.quantity > 1 && <span className="text-gray-400 text-sm font-normal">(x{tx.quantity})</span>}
+                </p>
                 <span className="text-xs text-gray-400 bg-gray-200 px-2 py-0.5 rounded-full">{tx.category}</span>
               </div>
               <div className="flex items-center gap-4">
-                <span className={`font-bold ${tx.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                  {tx.type === 'income' ? '+' : '-'}₱{tx.amount.toFixed(2)}
-                </span>
+                <div className="text-right">
+                  <span className={`font-bold block ${tx.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                    {tx.type === 'income' ? '+' : '-'}₱{tx.amount.toFixed(2)}
+                  </span>
+                  {tx.quantity > 1 && (
+                    <span className="text-xs text-gray-400">
+                      ₱{(tx.amount / tx.quantity).toFixed(2)} each
+                    </span>
+                  )}
+                </div>
                 <button 
                   onClick={() => deleteTransaction(tx.id)}
                   className="text-gray-400 hover:text-red-500 font-bold px-2 py-1 transition-colors"
+                  title="Delete transaction"
                 >
                   ✕
                 </button>
