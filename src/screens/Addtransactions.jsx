@@ -100,7 +100,7 @@ export default function Addtransactions() {
             className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 bg-white"
           >
             <option value="" disabled>Select a category</option>
-            <option value="Food & Dining">Food</option>
+            <option value="Food">Food</option>
             <option value="Transportation">Transportation</option>
             <option value="Entertainment">Entertainment</option>
             <option value="Salary">Salary / Allowance</option>
