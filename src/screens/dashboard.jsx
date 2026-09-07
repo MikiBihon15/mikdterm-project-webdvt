@@ -4,7 +4,8 @@ import useTransactions from '../hooks/useTransac';
 
 export default function Dashboard() {
   const { transactions } = useTransactions();
-  const [filter, setFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
 
   const balance = useMemo(() => {
     let total = 0;
@@ -27,12 +28,11 @@ export default function Dashboard() {
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter((tx) => {
-      if (filter === 'all') {
-        return true;
-      }
-      return tx.type === filter;
+      const matchesType = typeFilter === 'all' || tx.type === typeFilter;
+      const matchesCategory = categoryFilter === 'all' || tx.category === categoryFilter;
+      return matchesType && matchesCategory;
     });
-  }, [transactions, filter]);
+  }, [transactions, typeFilter, categoryFilter]);
 
   return (
     <div>
@@ -43,25 +43,42 @@ export default function Dashboard() {
       </div>
 
       {transactions.length === 0 ? (
-        <p className="text-gray-500 dark:text-gray-400">Your transactions will appear here.</p>
+        <p className="text-gray-500 dark:text-gray-400">No active transactions</p>
       ) : (
         <div className="space-y-3">
           
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
             <h3 className="font-semibold text-gray-700 dark:text-gray-200">Recent Transactions</h3>
-            <select 
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-            >
-              <option value="all">Show All</option>
-              <option value="income">Income Only</option>
-              <option value="expense">Expense Only</option>
-            </select>
+            
+            <div className="flex gap-2">
+              <select 
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                className="p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+              >
+                <option value="all">All Types</option>
+                <option value="income">Income Only</option>
+                <option value="expense">Expense Only</option>
+              </select>
+
+              <select 
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+              >
+                <option value="all">All Categories</option>
+                <option value="Food">Food</option>
+                <option value="Transport">Transport</option>
+                <option value="Utilities">Utilities</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Salary">Salary</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
           </div>
 
           {filteredTransactions.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400 text-sm">No transactions match this filter.</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">No transactions</p>
           ) : (
             filteredTransactions.map((tx) => (
               <Link key={tx.id} to={`/transaction/${tx.id}`} className="block transition-transform hover:scale-[1.01]">
